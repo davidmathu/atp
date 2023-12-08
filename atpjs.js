@@ -446,3 +446,10 @@ function finished() {
 	finishedMark2.setAttribute("class", "finished-mark-2");
 	finishedMark2.innerText = "Done";
 }
+
+let reset = document.querySelector("main").appendChild(document.createElement("button"));
+reset.style.marginTop = "1rem";
+reset.style.float = "right";
+reset.style.textDecoration = "underline";
+reset.innerText = "Reset proof";
+reset.onclick = function() {if (confirm("Reset this proof?")) location.reload();}
