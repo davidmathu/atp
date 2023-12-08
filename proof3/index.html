@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="../atpcss.css">
+</head>
+<body>
+  <main>
+    <p id="problem-statement"></p>
+    <table></table>
+  </main>
+  <script src="../atpjs.js"></script>
+  <script>
+    problemStatementHTML = "Here's an abstract proof in propositional logic. Try to prove that R is false.";
+    successLooksLike = ["(R) is false", "false ⟺ R"];
+   
+    let P = new Predicate("P");
+    let P1 = new Predicate("R");
+    let Q = new Predicate("Q");
+    let a = new QuantifiedVariable("a");
+    let b = new QuantifiedVariable("b");
+    let c = new QuantifiedVariable("c");
+    let d = new QuantifiedVariable("d");
+    let e = new QuantifiedVariable("e");
+    let x = new Figure("x");
+    let y = new Figure("y");
+    let z = new Figure("z");
+    
+    registerProposition(new LogicalEquivalenceProposition([new Predication(P, []), new Predication(P1, [x])]),);
+    registerProposition(new NegationProposition(new Predication(Q, [])), "Q is false");
+    registerProposition(new ImplicationProposition(new Predication(P, []), new Predication(Q, [])), "Given implication");
+    
+    initialize();
+    
+    function congProp(a, b, c, d) {
+      return new Predication(lineCongruence, [a, b, c, d]);
+    }
+  </script>
+</body>
+</html>

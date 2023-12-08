@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My experience building an ATP-like program</title>
+  <style>
+    .commented {
+      color: var(--gray);
+    }
+    
+    #toggle {
+      font-family: inherit;
+      background-color: inherit;
+      font-size: inherit;
+      color: inherit;
+      border: solid 0.125rem var(--gray);
+      border-radius: 1rem;
+      width: 50%;
+      margin: 0.5rem auto;
+      text-align: center;
+      padding: 0.75rem;
+      cursor: pointer;
+      display: block;
+    }
+    
+    #toggle[state="true"] {
+      background-color: var(--accent);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="my-experience-building-an-atp-like-program">My experience building an ATP-like program</h1>
+    <h3>~10 minute read</h3>
+    <p>This second post is a more free-flowing description of my journey in trying (and partially succeeding!) to implement an automated theorem prover that works with symbolic logic. This will probably make more sense if you&#39;ve already been a little exposed to mathematical logic and programming!</p>
+    <p>Also, I have a TON of additional comments for just about every point brought up here. Here, you can toggle them:</p>
+    <button onclick="toggle();" id="toggle"></button>
+    <p>My ATP isn&#39;t truly an ATP, because there&#39;s still a user choosing when to perform which transformations on the set of theorems, but the automated part is storing and operating on statements in the formal, symbolic notation. (Don&#39;t expect me to prove any famous conjectures here.)</p>
+    <h2 id="structuring-my-data">Structuring my data</h2>
+    <p>First, I defined the structures that my ATP should be able to work with.</p>
+    <ul>
+    <li><strong>Figures</strong>: In geometry, these are lines, points, or triangles. In set theory, these are sets. These objects cannot be further broken down.<ul>
+    <li class="commented">In geometry, lots of objects actually can be broken down: $\overline{AB}$ is composed of $A$ and $B$ in a way that becomes significant when interacting with quantifiers. For this reason, I instead treat only $A$ and $B$ as objects, and any reference to $\overline{AB}$ is instead encoded as part of relations&#39; definitions. $\overline{AB}\cong\overline{CD}$ is represented as $P_\cong(A,B,C,D)$. This actually leads to a nightmare of commutativity: $P_\cong(A,B,C,D)\Leftrightarrow P_\cong(B,A,C,D)\Leftrightarrow P_\cong(A,B,D,C)\Leftrightarrow P_\cong(B,A,D,C)$, not to mention that $\cong$ is already a symmetric relation. In general, this means my ATP will be subject to a lot of &#39;wandering&#39; around different forms of the same statement.</li>
+    <li class="commented">One idea I had to solve this was to make the argument of a relationships a set that can be nested as you like: $P_\cong(\{\{A,B\},\{C,D\}\})$ has no ordering among $A,B,C,D$ while still pairing $A,B$ and $C,D$. This would be useful if sets weren&#39;t internally stored as arrays anyway.</li>
+    </ul>
+    </li>
+    <li><strong>Relations</strong>: In geometry, this is $\cong$. In set theory, this is $\subseteq$ and $\in$. More generally, when I set up my ATP with a problem, I should define a set of relationships $P_1$, $P_2$, ... that take the objects above as arguments.</li>
+    <li><strong>Quantified Variables</strong>: A lot of theorems take the form of abstract &quot;if-then&quot; statements that are true of any argument (symbolically denoted $\forall x$). For example, if a theorem states that $\forall x P(x)\to Q(x)$, any figure can be substituted for $x$ and the inner proposition holds true (e.g. $P(\overline{AB})\to Q(\overline{AB})$). This is a useful substitution if $\overline{AB}$ is already known to satisfy $P$.<ul>
+    <li class="commented">If $P_1(A)$ is already known to be true, substituting $A$ for $x$ above creates $P_1(A)\to P_2(A)$, which simplifies to $\text{true}\to P_2(A)$ and then to $P_2(A)$. I have a hunch that the most difficult part of implementing this algorithm will be getting a computer to intelligently choose substitutions for $x$ that simplify things as cleanly as this example.</li>
+    <li class="commented">Actual propositional logic employs two types of quantified variables. I only use one ($\forall$) because it simplifies my programming and is more useful when it comes to substitution. However, by ignoring $\exists$, I do miss out on the capacity to &quot;create new figures&quot;, so all proofs will always work with the same initial set of figures. I also totally ignore the nesting (and thus the order) of quantifiers, which means more nuanced theorems like $(\forall x:P(x))\to(\forall x:Q(x))$ can&#39;t be encoded.</li>
+    </ul>
+    </li>
+    <li><strong>Proposition</strong>: These are just statements. They can be made out of a predication like $P(x,y,\dots)$ on either figures or quantified variables. Every proposition ever handled by this program at any point should be a true proposition. Hypothetical situations are always managed using implication statements (e.g. $P\to Q$, which only can simplify to $Q$ once $P$ evaluates to $\text{true}$). Propositions are stored as abstract syntax trees.<ul>
+    <li class="commented"><code>Proposition</code> is a class with subclasses <code>TrueProposition</code>, <code>FalseProposition</code>, <code>AndProposition</code>, <code>OrProposition</code>, <code>LogicalEquivalenceProposition</code>, <code>NegationProposition</code>, and <code>ImplicationProposition</code>, all of which come from boolean constants and boolean connectives. There is also the subclass <code>Predication</code>, which holds a relation and a list of arguments. Each proposition has methods for <code>toString()</code> and <code>copy()</code> (of course object references and copying were a nightmare during this project). Propositions can also perform substitutions (recursively if composed of several component propositions), replacing all instances of a given quantified variable with a given figure. Propositions also have the method <code>simplified()</code>, which simplifies the proposition to a simpler state (e.g. $\text{true}\land P$ becoming $P$) <em>The essence of a good ATP is choosing substitutions which are the most useful for simplifying.</em></li>
+    </ul>
+    </li>
+    </ul>
+    <h2 id="algorithms">Algorithms</h2>
+    <p>For the sake of describing the algorithms behind this program, let&#39;s work with the example problem of being given:</p>
+    <ul>
+    <li>$P(x,y)\Leftrightarrow Q(y,x)$ (where $x$ and $y$ are quantified variables)</li>
+    <li>$P(0,1)$ (where $0$ and $1$ are Figures)</li>
+    </ul>
+    <p>And its goal is to prove $Q(1,0)$. The algorithm can perform three kinds of operations:</p>
+    <ul>
+    <li><p><strong>Substitution</strong>: Given an existing theorem, replace all instances of a chosen quantified variable with a figure. The resulting theorem will be true. In $P(x,y)\Leftrightarrow Q(y,x)$, substituting $x\to 0$ and $y\to 1$ creates $P(0,1)\Leftrightarrow Q(1,0)$.</p>
+    </li>
+    <li><strong>Lookup</strong>: Looking at all of the predications in a given theorem, try to replace them with boolean values if any of them have already been determined. $P(0,1)$ was given as true, so the proposition from before can be reduced to $\text{true}\Leftrightarrow Q(1,0)$. This means the program stores a list of predications that have been absolutely proven true or false. It knows when something has been proven when it stands alone (like $P(0,1)$ did) or when it&#39;s in certain structures of logical connectives (like $P\;\text{and}\;Q$).</li>
+    <ul><li class="commented">If we ever prove something like $P\;\text{or}\;Q$, we can&#39;t submit either statement as true into the list of known predications. This is unfortunate, because $P\;\text{or}\;Q$ <em>does</em> hold meaningful information that could be useful if $P$ and $Q$ ever showed up together elsewhere. A more advanced implementation should probably look for equivalence between arbitrary proposition to make more intelligent lookups like this. (I think I would need to learn about alpha equivalence and implement something with truth tables.)</li></ul>
+    </li>
+    <li><strong>Simplification</strong>: Applying laws of boolean algebra lets propositions become less nested, which helps &quot;pick out&quot; tiny propositions from more complicated statements. In the above example, $\text{true}\Leftrightarrow Q(1,0)$ can simply become $Q(1,0)$. And that&#39;s the proof!<ul>
+    <li class="commented">Note that both lookup and simplification are performed by the <code>simplified()</code> method!</li>
+    </ul>
+    </li>
+    </ul>
+    <p>This is a comically simple example, which is probably why my implementation doesn&#39;t break while solving it. Here, try that exact proof (except $P$ and $Q$ are instead $&lt;$ and $&gt;$):</p>
+    <iframe src="../proof1"></iframe><div class="after-iframe">&nbsp;</div>
+    <h2 id="another-example">Another example</h2>
+    <p>Here&#39;s another problem setup, this time based in geometry. Try to prove that $\triangle\text{ABC}$ is an equilateral triangle.</p>
+    <p>(Click the blurry box below to reveal a solution:)</p>
+    <div style="padding: 1rem; border: solid 0.125rem var(--gray); filter: blur(0.5rem); transition: 0.2s; cursor: pointer; user-select: none;" state="true" onclick="this.setAttribute('state', this.getAttribute('state')=='true' ? 'false' : 'true'); this.style.filter = (this.getAttribute('state')=='true') ? 'blur(0.5rem)' : 'none';">
+      First, perform substitution on proposition (2) and simplify your result twice. Then, you want to demonstrate $\overline{BC}\cong\overline{AB}$, and you already know $\overline{AB}\cong\overline{BC}$. You can do that by substituting from (1) by subbing $(x, y, z, w)$ to $(B, C, A, B)$. Simplify until the conditions for (6) are met!
+    </div>
+    <iframe src="../proof2"></iframe><div class="after-iframe">&nbsp;</div>
+    <p>Note that in this example, predications are delivered with text (&quot;is an equilateral triangle&quot;) and not with formulas (&quot;$\text{E}(\text{A},\text{B},\text{C})$&quot;).</p>
+    <h2 id="a-little-documentation">A little documentation</h2>
+    <p>Do YOU want to give my ATP a little problem and use its tools to make proof? Here&#39;s how I would do it!</p>
+    <p>All the code that runs the ATP-like device (including both the propositional logic stuff and the user interface stuff) is in <a href="davidmathu.github.io/atp/atpjs.js">atpjs.js</a>. You should also probably link <a href="davidmathu.github.io/atp/atpjs.js">atpcss.css</a> for all the CSS to make the page look nice, but of course you can make the CSS whatever you want!</p>
+    <p>In the page that links the JavaScript, you need to include a bit of your own JavaScript that defines</p>
+    <ul>
+    <li>A problem statement, shown as text to the user</li>
+    <li>The predicates, figures, and quantified variables that will be used</li>
+    <li>The given propositions that you start with</li>
+    <li>A call to <code>initialize()</code></li>
+    </ul>
+    <p>Here&#39;s what that looks like for the example of proving $1&gt;0$ from $0&lt;1$:</p>
+    
+    <pre>problemStatementHTML = "Given the theorem
+relating > and <, prove that 1 > 0 from 0 < 1.";
+successLooksLike = ["1 > 0"];
+
+let lessThan = new Predicate("${0} < ${1}");
+let greaterThan = new Predicate("${0} > ${1}");
+let a = new QuantifiedVariable("a");
+let b = new QuantifiedVariable("b");
+let fig0 = new Figure("0");
+let fig1 = new Figure("1");
+
+registerProposition(new LogicalEquivalenceProposition([
+  new Predication(lessThan, [a, b]),
+  new Predication(greaterThan, [b, a])
+]), "Given");
+registerProposition(new Predication(lessThan, [fig0, fig1]), "Given");
+
+initialize();</pre>
+    
+    <p>Predicates, quantified variables, and figures are all just identified with string labels. They have no internal logic! (For predicate labels, note that <code>${0}</code>, <code>${1}</code>, etc. indicate where arguments are substituted when <code>.toString()</code>ing a predication.)</p>
+    <p>Creating and registering the propositions is a bit more tricky. <code>registerProposition()</code> takes two arguments, a proposition and a string label. The propositions all have to be made using constructors. Here&#39;s a brief rundown of all the proposition types and their constructors:</p>
+    <ul>
+    <li><code>new FalseProposition()</code>: always false</li>
+    <li><code>new TrueProposition()</code>: always true</li>
+    <li><code>new NegationProposition(x)</code>: the negation of proposition <code>x</code></li>
+    <li><code>new Predication(p, [a0, a1, ...])</code>: a predication using predicate <code>p</code> and arguments <code>a0</code>, <code>a1</code>, ..., where each argument can be either a figure or quantified variable</li>
+    <li><code>new AndProposition([x, y, ...])</code>: the logical conjunction of propositions <code>x</code>, <code>y</code>, ...</li>
+    <li><code>new OrProposition([x, y, ...])</code>: the logical disjunction of propositions <code>x</code>, <code>y</code>, ...</li>
+    <li><code>new LogicalEquivalenceProposition([x, y, ...])</code>: propositions <code>x</code>, <code>y</code>, ... are logically equivalent (always share the same truth value)</li>
+    <li><code>new ImplicationProposition(x, y)</code>: the proposition if <code>x</code>, <code>y</code></li>
+    </ul>
+    <h2 id="did-i-succeed-">Did I succeed?</h2>
+    <p>Again, I reiterate that I didn&#39;t write this program to choose which steps should be taken. The heuristics necessary to make a program that meaningfully searches for a proof are beyond what I&#39;m capable of. However, this has been a very cool exploration of the inner workings of propositional logic, math as a formal language, and systems of proofs.</p>
+    <p>If I wanted to improve this program further, I would probably:</p>
+    <ul>
+    <li>Change how quantified variables work! Quantified variables here are just stored a special kind of argument, when they are really a node in the abstract syntax tree in their own right! I should have nodes that look like $\forall x(\text{Node})$ and $\exists x(\text{Node})$.</li>
+    <li>I should include both types of quantification ($\forall$ and $\exists$)! This would allow proofs to talk about figures that should exist but whose value isn&#39;t known, and this would also let the set of figures become arbitrary large (as opposed to being limited at the outset of the problem). This is necessary for even something as simple as the Peano axioms.</li>
+    <li>In general, the whole system of substitution needs a lot of fixing. I need to look for alpha equivalence to tell if arbitrary propositions are equal, which would enable more advanced substitutions/lookups. I need to be able to rename quantified variables within some scope while maintaining which variables are equivalent within the scope, because this would enable propositions to be merged in more complicated ways without variable names &quot;colliding&quot;.</li>
+    <li>I should probably introduce a super generalize idea of &quot;equality&quot; to facilitate the many more instances of substitution that these fixes would create. This would also be useful when talking about commutativity of arguments. For example, when I made my ATP do geometry, I kept having to say that $\overline{AB}$ is the same as $\overline{BA}$, but for <em>every</em> predicate where such a substitution might be useful. This is annoying and only hinders user experience!</li>
+    </ul>
+  </main>
+</body>
+<script src="../articlescript.js"></script>
+<script>
+  let toggleState = true; //true if show
+  toggle();
+  function toggle() {
+    toggleState = !toggleState;
+    for (let c of document.querySelectorAll(".commented")) c.style.display = toggleState ? null : "none";
+    document.querySelector("#toggle").innerText = toggleState ? "Hide extra notes (currently showing)" : "Show extra notes (currently hiding)";
+    document.querySelector("#toggle").setAttribute("state", toggleState);
+  }
+  //setInterval(toggle, 500);
+</script>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="../atpcss.css">
+</head>
+<body>
+  <main>
+    <p id="problem-statement"></p>
+    <table></table>
+  </main>
+  <script src="../atpjs.js"></script>
+  <script>
+    problemStatementHTML = "Given the theorem relating > and <, prove that 1 > 0 from 0 < 1.";
+    successLooksLike = ["1 > 0"];
+   
+    let lessThan = new Predicate("${0} < ${1}");
+    let greaterThan = new Predicate("${0} > ${1}");
+    let a = new QuantifiedVariable("a");
+    let b = new QuantifiedVariable("b");
+    let fig0 = new Figure("0");
+    let fig1 = new Figure("1");
+    
+    registerProposition(new LogicalEquivalenceProposition([new Predication(lessThan, [a, b]), new Predication(greaterThan, [b, a])]), "Given");
+    registerProposition(new Predication(lessThan, [fig0, fig1]), "Given");
+    
+    initialize();
+  </script>
+</body>
+</html>

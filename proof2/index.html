@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="../atpcss.css">
+</head>
+<body>
+  <main>
+    <p id="problem-statement"></p>
+    <table></table>
+  </main>
+  <script src="../atpjs.js"></script>
+  <script>
+    problemStatementHTML = "Prove that △ABC is an equilateral triangle.";
+    successLooksLike = [
+      "△ABC is an equilateral triangle",
+      "△ACB is an equilateral triangle",
+      "△BAC is an equilateral triangle",
+      "△BCA is an equilateral triangle",
+      "△CBA is an equilateral triangle",
+      "△CAB is an equilateral triangle",
+    ];
+   
+    let lineCongruence = new Predicate("<span class=\"overline\">${0}${1}</span> ≅ <span class=\"overline\">${2}${3}</span>");
+    let equilateral = new Predicate("△${0}${1}${2} is an equilateral triangle");
+    let x = new QuantifiedVariable("x");
+    let y = new QuantifiedVariable("y");
+    let z = new QuantifiedVariable("z");
+    let w = new QuantifiedVariable("w");
+    let s = new QuantifiedVariable("s");
+    let t = new QuantifiedVariable("t");
+    let fig0 = new Figure("A");
+    let fig1 = new Figure("B");
+    let fig2 = new Figure("C");
+    
+    //registerProposition(new LogicalEquivalenceProposition([new Predication(lineCongruence, [x, y, y, x]), new Predication(lineCongruence, [y, x])]), "Given")
+    //registerProposition(new Predication(lineCongruence, [x, y, y, x]), "Given");
+    /* registerProposition(new ImplicationProposition(
+      new AndProposition([new Predication(lineCongruence, [x, y, v, w]), new Predication(lineCongruence, [v, w, s, t])]),
+      new Predication(lineCongruence, [x, y, s, t])
+    ), "Given (Transitivity)"); */
+    registerProposition(new LogicalEquivalenceProposition([congProp(x, y, z, w), congProp(z, w, x, y)]), "Commutativity of congruence");
+    registerProposition(new ImplicationProposition(
+      new AndProposition([congProp(x, y, y, z), congProp(y, z, x, y)]),
+      new Predication(equilateral, [x, y, z])
+    ), "Definition of equilateral triangle");
+    
+    registerProposition(congProp(fig0, fig1, fig1, fig2), "Given");
+    registerProposition(congProp(fig1, fig2, fig2, fig0), "Given");
+    
+    initialize();
+    
+    function congProp(a, b, c, d) {
+      return new Predication(lineCongruence, [a, b, c, d]);
+    }
+  </script>
+</body>
+</html>

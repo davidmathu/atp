@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>We already know how to prove the twin prime conjecture: A motivation for trying to build an ATP-like program</title>
+</head>
+<body>
+  <main>
+    <h1 id="we-already-know-how-to-prove-the-twin-prime-conjecture-a-motivation-for-trying-to-build-an-atp-like-program">We already know how to prove the twin prime conjecture: A motivation for trying to build an ATP-like program</h1>
+    <h3>~7 minute read</h3>
+    <h2 id="how-do-proofs-work-">How do proofs work?</h2>
+    <p>If you&#39;ve ever taken a geometry class in high school, you are all too familiar with two-column proofs. You are given a setup, whether it&#39;s a diagram or a few statements, and you apply theorems to transform your old statements into new statements. Your new statements have been rigorously proven as true.</p>
+    <p>Each proof results in a true theorem, which is equally valid as the theorems you used in the proof. Theorems build off of each other and form a collection of true statements that can be applied whenever and wherever. That&#39;s why I think theorems are so cool! It&#39;s theorems all the way down!</p>
+    <h2 id="could-we-prove-all-the-theorems-tiny-img-of-prove-all-the-theorems">Could we prove all the theorems?</h2>
+    <p>If you&#39;ve ever had no clue how to approach a two-column proof, you&#39;ve probably tried throwing theorems together to see what works. This takes a lot of time, but randomly applying theorems using substitution and simplification will eventually get you to your answer. In fact, if you don&#39;t stop, this approach could generate all possible proofs derived from your set of given statements.</p>
+    <p>This would be a waste of time for a human to work through. Computers, however, are fast, and if you teach them to &#39;apply&#39; theorems together, they can manipulate symbols as long as you like and prove infinitely many true statements. These algorithms are called Automated Theorem Provers (ATPs).</p>
+    <p>In practice, ATPs aren&#39;t working &quot;randomly&quot;: they use heuristic functions to predict which next steps will bring them closer to the statement they want to prove. These heuristics are the most experimental and difficult parts of getting an ATP to work right.</p>
+    <p>Here is a brief look at the ATP-like program I built while exploring automated theorem proving. It&#39;s not automatic (you, the user have to make each step), but it stores a list of statements that are true, and you can manipulate old statements to create new statements until you reach your desired proof.</p>
+    <iframe src="../proof2"></iframe><div class="after-iframe">&nbsp;</div>
+    <h2 id="implementing-an-atp">Implementing an ATP</h2>
+    <p>The geometric theorem playground above is specifically built to prove theorems in geometry. In geometry, the &quot;objects&quot; are lines, triangles, or angles. The &quot;relationships&quot; between objects are congruence (denoted $\cong$).</p>
+    <p>Other fields of math interact with different objects and relationships. Set theory works with sets, which are related using symbols like $\subseteq$ and $\in$. Number theory works with numbers and functions, which are related using symbols like $=$ and $\in$ and $&lt;$.</p>
+    <p>First-order logic is a mathematical discipline that can bring different fields together by taking advantages of these corresponding structures, and thus it&#39;s also the perfect tool to wield when getting a computer to generate proofs for you.</p>
+    <p>This abstraction also means you can exclusively work in symbolic notation and ignore the corresponding visual interpretation of the problem. When making a two-column geometric proof by applying theorems, the diagram you draw doesn&#39;t matter; all that matters is the statements written down in a formal, symbolic language. This may make it more difficult for humans to conceptualize and intuit a problem, but computers don&#39;t care.</p>
+    <p>Here is a similar interactable to the one above, except it &quot;looks&quot; more like propositional logic than geometry. (Secretly, they both operate on the same principles! Math is awesome because you can generalize problems.)</p>
+    <iframe src="../proof3"></iframe><div class="after-iframe">&nbsp;</div>
+    <h2 id="g-del-s-inconvenient-truth">Gödel&#39;s inconvenient truth</h2>
+    <p>ATPs actually cannot prove all true statements. The title of this post was a lie. In my defense, humans can&#39;t prove all true statements either.</p>
+    <p>In 1931, Kurt Gödel proved that there are true statements that are unprovable in any mathematical system. Math right now has plenty of conjectures (statements that seem true but are yet unproven), so it is currently impossible to know if these conjectures are true or false, and whether or not they could ever be proven. This is obviously a huge bummer, while simultaneously being one of the most unbelievably fascinating results in modern math.</p>
+    <p>The title of this post implied ATPs could solve these difficult problems, like the twin prime conjecture of Riemann Zeta hypothesis, but they probably won&#39;t. Smart people have been trying to solve those problems since the 1800s, so an ATP running on first-order logic probably can&#39;t crack it. (Especially not mine!!) But ATPs have been able to find tighter proofs for theorems from <em>Principia Mathematica</em>, and more generally, computerized approaches to proofs are only becoming more common (look at the 4 color map theorem, or <a href="https://www.nature.com/articles/nature.2016.19990">that hilarious 200 TB brute force proof about Pythagorean triples</a>).</p>
+    <h2 id="math-is-actually-a-language-i-think">Math is actually a language, I think</h2>
+    <p>This mode of dealing with math is totally removed from its original context. Number theory is no longer about numbers, and geometry is no longer about shapes; everything is about propositions, theorems, and moving around symbolic language.</p>
+    <p>Does that count as doing math? I think so.</p>
+    <p>The applications of math aren&#39;t lost by abstracting problems into symbolic language. The results proven by a formal language are just as valid as they would be if they had been proven using diagrams and construction. It does necessitate a step of translation into and out of the &quot;actual problem&quot;, but if you&#39;re comfortable working with the notation of propositional logic, that&#39;s really no biggie.</p>
+    <p>There is the issue of whether or not humans can &quot;understand&quot; what&#39;s going on. Continuing with the example of geometry, you can lose intuition over what&#39;s true in a mathematical system when you no longer see the shapes and only see the symbols.</p>
+    <p>This argument especially rings true when the language is handed over to a computer to churn through a proof. If a human doesn&#39;t go through and try to understand the structure and points of a computer-generated proof, all the human can be confident of is that the proof is correct.</p>
+  </main>
+</body>
+<script src="../articlescript.js"></script>
+</html>

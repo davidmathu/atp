@@ -1,0 +1,174 @@
+:root {
+	font-family: 'Inter', sans-serif;
+	--bg: #eee;
+	--gray: gray;
+	--text: #222;
+	--accent: #26d;
+}
+
+body {
+	background-color: var(--bg);
+	color: var(--text);
+	overflow-x: hidden;
+}
+
+main {
+	width: min(48rem, calc(100% - 4rem));
+	margin: 8rem auto;
+	font-size: 1.125rem;
+	line-height: 150%;
+}
+
+mjx-container {
+	pointer-events: none;
+}
+
+h1 {
+	font-size: 3rem;
+	font-family: 'Inter Display', 'Inter', sans-serif;
+	line-height: 100%;
+}
+
+h1::before {
+	display: block;
+	content: '-';
+	font-size: 0.0125rem;
+	height: 0.125rem;
+	width: 50%;
+	margin-bottom: 0.5rem;
+	color: var(--gray);
+	background-color: var(--gray);
+}
+
+h2 {
+	font-size: 1.75rem;
+	margin-top: 4rem;
+	line-height: 125%;
+}
+
+h2::before {
+	content: '-';
+	width: 2rem;
+	height: 2rem;
+	background-color: var(--accent);
+	color: var(--accent);
+	text-align: center;
+	border-radius: 0.5rem;
+	display: inline-block;
+	margin-right: 1rem;
+}
+
+b, a {
+	color: var(--accent);
+}
+a {
+	text-decoration: underline;
+	cursor: pointer;
+}
+a:hover {
+	color: var(--text);
+}
+
+li {
+	margin: 0.5rem 0;
+}
+
+textarea {
+	display: none;
+}
+
+::selection {
+	background: var(--accent);
+	color: var(--bg);
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+td {
+	padding: 0.5rem 0;
+}
+
+td:first-child {
+	padding-right: 4rem;
+}
+
+td:nth-child(2) {
+	color: var(--gray);
+	text-transform: uppercase;
+	font-size: 1rem;
+	width: 12rem;
+}
+
+strong, h1, h2 {
+	font-weight: 800;
+}
+
+strong {
+	color: var(--accent);
+}
+
+blockquote {
+	background-color: yellow;
+}
+
+iframe {
+	width: 100vw;
+	position: absolute;
+	left: 0;
+	height: 100vh;
+	margin: 0;
+	margin-top: 2rem;
+	border: none;
+}
+
+.after-iframe {
+	margin-bottom: calc(100vh + 4rem);
+}
+
+code {
+	background-color: #fff;
+	padding: 0.125rem 0.25rem;
+	border-radius: 0.5rem;
+}
+
+pre {
+	font-family: monospace;
+	background-color: var(--text);
+	color: var(--bg);
+	padding: 1rem;
+	border: solid 0.125rem var(--gray);
+}
+
+#toc {
+	display: block;
+	position: fixed;
+	top: 2rem;
+	left: 1rem;
+}
+
+#toc::before {
+	content: 'Post contents:';
+}
+
+#toc a {
+	display: block;
+	max-width: calc(50vw - 32rem);
+	line-height: 125%;
+	margin: 0.5rem 0;
+}
+
+#toc .other-article {
+	margin-top: 3rem;
+}
+#toc .other-article a {
+	margin-top: 0.5rem;
+}
+
+h3 {
+	margin: 0;
+	font-size: 1rem;
+	color: var(--gray);
+}
