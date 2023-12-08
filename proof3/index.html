@@ -25,7 +25,7 @@
     let y = new Figure("y");
     let z = new Figure("z");
     
-    registerProposition(new LogicalEquivalenceProposition([new Predication(P, []), new Predication(P1, [x])]),);
+    registerProposition(new LogicalEquivalenceProposition([new Predication(P, []), new Predication(P1, [x])]), "Given");
     registerProposition(new NegationProposition(new Predication(Q, [])), "Q is false");
     registerProposition(new ImplicationProposition(new Predication(P, []), new Predication(Q, [])), "Given implication");
     
