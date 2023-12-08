@@ -51,3 +51,5 @@ if (document.querySelector("title").innerText.startsWith("W")) {
 	otherartA.setAttribute("href", "../motivation");
 	otherartA.innerText = "We already know how to prove the twin prime conjecture: A motivation for trying to build an ATP-like program";
 }
+
+setInterval(function(){nav.style.display = window.innerWidth < 1280 ? "none" : "block"}, 100);
